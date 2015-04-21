@@ -1,0 +1,138 @@
+<html >
+<head>
+<script>
+
+function loadXMLDoc(file)
+{
+try
+	{
+		xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+	}
+	catch(e)
+	{
+	try
+	{
+	xmlDoc = document.implementation.createDocument("","",null);
+	}
+	catch(e){alert(e.message)}
+	}
+	try
+	{
+	xmlDoc.async=false;
+	xmlDoc.load(file);
+	return(xmlDoc);
+	}
+	catch(e){alert(e.message)}
+	return(null);
+}
+function getItems()
+{
+	var xmlFile = loadXMLDoc("items.xml");
+	var ItemsCount = xmlFile.getElementsByTagName("cbc:ID").length;
+	for(i=0;i<ItemsCount;i++)
+	{
+	document.getElementById("target").innerHTML += xmlFile.getElementsByTagName("cbc:ID")[i].childNodes[0].nodeValue;
+	}
+}
+function getOrderTemplate()
+{
+	var xmlFile = loadXMLDoc("Order-template.xml");
+	var OrderCount = xmlFile.getElementsByTagName("cbc:ID").length;
+	return xmlFile;
+}
+function randomId() {
+	var id = '';
+	for(i=0;i<9;i++){
+		  var aleatorio = Math.round(Math.random()*10);
+		  id= id + aleatorio;
+		}
+	if (id.length==9){
+		var aleatorio = Math.round(Math.random()*10);
+		id= id + aleatorio;
+	}
+	document.getElementById("target").innerHTML += id;
+	return id;
+	}
+	
+	function randomDate (){
+
+	// Display the month, day, and year. getMonth() returns a 0-based number.
+	var month =  Math.round(Math.random() * 12) + 1;
+	var day =  Math.round(Math.random() * 30) + 1;
+	var year = Math.round(Math.random() * 61) + 1990;
+	var r=(year + '-' + month + '-' + day);
+	document.getElementById("target").innerHTML += r;
+	return r;
+	}
+
+function randomGUID()  { 
+    function _p8(s) {
+        var p = (Math.random().toString(16)+"000000000").substr(2,8);
+        return s ? "-" + p.substr(0,4) + "-" + p.substr(4,4) : p ;
+    }
+    document.getElementById("target").innerHTML +=_p8().toUpperCase() + _p8(true).toUpperCase() + _p8(true).toUpperCase() + _p8().toUpperCase();
+	var total =_p8().toUpperCase() + _p8(true).toUpperCase() + _p8(true).toUpperCase() + _p8().toUpperCase();
+	return total;
+}
+
+
+function getParties()
+{
+	var xmlFile = loadXMLDoc("parties.xml");
+	var newOrder = getOrderTemplate();
+	var PartiesCount = xmlFile.getElementsByTagName("cac:Party").length;
+	var paryActualBuyer = xmlFile.getElementsByTagName("cac:Party")[Math.round(Math.random()*PartiesCount)];
+	var paryActualSeller = xmlFile.getElementsByTagName("cac:Party")[Math.round(Math.random()*PartiesCount)];
+	var paryBuyer = newOrder.getElementsByTagName("cac:Party")[0];
+	var parySeller = newOrder.getElementsByTagName("cac:Party")[1];
+	
+	newOrder.getElementsByTagName("cbc:ID")[0].childNodes[0].nodeValue = randomId();
+	newOrder.getElementsByTagName("cbc:UUID")[0].childNodes[0].nodeValue = randomGUID();
+	newOrder.getElementsByTagName("cbc:IssueDate")[0].childNodes[0].nodeValue = randomDate();
+	
+	newOrder.getElementsByTagName("cac:BuyerCustomerParty")[0].replaceChild(paryActualBuyer,paryBuyer);
+	newOrder.getElementsByTagName("cac:SellerSupplierParty")[0].replaceChild(paryActualSeller,parySeller);
+	for(i=0;i< newOrder.getElementsByTagName("cac:Party").length;i++)
+	{
+	document.getElementById("target").innerHTML += newOrder.getElementsByTagName("cbc:Name")[i].childNodes[0].nodeValue;
+	}
+
+var Order = loadXMLDoc("Order-template.xml");
+var xmlItems = loadXMLDoc("items.xml");
+
+for (i=1;i<(Math.random()*10)+1;i++){
+	var aleatorio = Math.round(Math.random()*xmlItems.getElementsByTagName("cac:CatalogueLine").length);
+	var description =	xmlItems.getElementsByTagName("cbc:Description")[aleatorio].childNodes[0].nodeValue;
+	var PriceAmount =	xmlItems.getElementsByTagName("cbc:PriceAmount")[aleatorio].childNodes[0].nodeValue;
+	var Quantity = Math.round(Math.random()*100);
+	if(i==1){
+	}else{	newOrder.getElementsByTagName("cbc:Description")[0].childNodes[0].nodeValue = description;
+		newOrder.getElementsByTagName("cbc:PriceAmount")[0].childNodes[0].nodeValue = PriceAmount;
+		newOrder.getElementsByTagName("cbc:Quantity")[0].childNodes[0].nodeValue = Quantity;
+		newOrder.getElementsByTagName("cbc:LineExtensionAmount")[1].childNodes[0].nodeValue = PriceAmount * Quantity;
+
+		var newOrderLine = newOrder.getElementsByTagName("cac:OrderLine")[0].childNodes[0].cloneNode(true);
+		newOrderLine.getElementsByTagName("cbc:Description")[0].childNodes[0].nodeValue = description;
+		newOrderLine.getElementsByTagName("cbc:PriceAmount")[0].childNodes[0].nodeValue = PriceAmount;
+		newOrderLine.getElementsByTagName("cbc:Quantity")[0].childNodes[0].nodeValue = Quantity;
+		newOrderLine.getElementsByTagName("cbc:LineExtensionAmount")[0].childNodes[0].nodeValue = PriceAmount * Quantity;
+		newOrder.appendChild(newOrderLine);
+	}
+}
+
+return newOrder;
+}
+
+function imprimir()
+{
+alert("id: "+randomId()+"\ndate: "+randomDate()+"\nUUID: "+randomGUID());
+}
+
+
+
+</script>
+</head>
+<body onload="getParties()">
+<div id="target"></div>
+</body>
+</html>
